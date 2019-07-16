@@ -3,7 +3,7 @@ from src import utils
 
 STR_MORE = " (more...)"
 STR_MORE_LEN = len(STR_MORE.encode("utf8"))
-STR_CONTINUED = "(...continued) "
+STR_CONTINUED = "(...continua) "
 
 class Out(object):
     def __init__(self, server, module_name, target, target_str, tags):

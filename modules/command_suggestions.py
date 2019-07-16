@@ -18,5 +18,5 @@ class Module(ModuleManager.BaseModule):
                 nickname = "%s: " % event["user"].nickname
 
             event["target"].send_message(
-                "%sUnknown command. Did you mean %s%s?" % (
+                "%sComando sconosciuto. Volevi usare %s%s?" % (
                 nickname, event["command_prefix"], match[0]))

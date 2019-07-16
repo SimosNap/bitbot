@@ -2,7 +2,7 @@
 
 from src import ModuleManager, utils
 
-URL_WIKIPEDIA = "https://en.wikipedia.org/w/api.php"
+URL_WIKIPEDIA = "https://it.wikipedia.org/w/api.php"
 
 class Module(ModuleManager.BaseModule):
     @utils.hook("received.command.wi", alias_of="wiki")
@@ -10,7 +10,7 @@ class Module(ModuleManager.BaseModule):
     @utils.hook("received.command.wikipedia", min_args=1)
     def wikipedia(self, event):
         """
-        :help: Get information from wikipedia
+        :help: Ottieni informazioni da wikipedia
         :usage: <term>
         """
         page = utils.http.request(URL_WIKIPEDIA, get_params={

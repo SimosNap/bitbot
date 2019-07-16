@@ -17,7 +17,7 @@ class Module(ModuleManager.BaseModule):
     @utils.hook("received.command.weather")
     def weather(self, event):
         """
-        :help: Get current weather for you or someone else
+        :help: Ottieni informazioni Meteo per una località
         :usage: [nickname]
         :require_setting: location
         :require_setting_unless: 1
@@ -40,7 +40,7 @@ class Module(ModuleManager.BaseModule):
             location = self._user_location(event["user"])
             nickname = event["user"].nickname
             if location == None:
-                raise utils.EventError("You don't have a location set")
+                raise utils.EventError("Non hai una località impostata")
 
         args = {"units": "metric", "APPID": api_key}
 
@@ -76,10 +76,10 @@ class Module(ModuleManager.BaseModule):
                 if not nickname == None:
                     event["stdout"].append_prefix("|%s" % nickname)
                 event["stdout"].write(
-                    "(%s) %s/%s | %s | Humidity: %s | Wind: %s/%s" % (
+                    "(%s) %s/%s | %s | Umidità: %s | Vento: %s/%s" % (
                     location_str, celsius, fahrenheit, description, humidity,
                     wind_speed_k, wind_speed_m))
             else:
-                event["stderr"].write("No weather information for this location")
+                event["stderr"].write("Non sono presenti informazioni meteo per la località indicata")
         else:
             raise utils.EventsResultsError()

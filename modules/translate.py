@@ -12,8 +12,8 @@ class Module(ModuleManager.BaseModule):
     @utils.hook("received.command.translate")
     def translate(self, event):
         """
-        :help: Translate the provided phrase or the last line in thie current
-            channel
+        :help: Traduce la frase indicata o l'ultima linea inviata nel 
+            canale corrente
         :usage: [phrase]
         """
         phrase = event["args"]
@@ -24,7 +24,7 @@ class Module(ModuleManager.BaseModule):
         if not phrase:
             raise utils.EventError("No phrase provided.")
         source_language = "auto"
-        target_language = "en"
+        target_language = "it"
 
         language_match = re.match(REGEX_LANGUAGES, phrase)
         if language_match:

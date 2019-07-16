@@ -1,29 +1,37 @@
+#--depends-on config
+#--depends-on shorturl
+	
 import time
 from src import ModuleManager, utils
 import feedparser
 
 RSS_INTERVAL = 60 # 1 minute
 
-def _format_entry(feed_title, entry):
-    title = entry["title"]
-
-    author = entry.get("author", None)
-    author = " by %s" % author if author else ""
-
-    link = entry.get("link", None)
-    link = " - %s" % link if link else ""
-
-    feed_title_str = "%s: " % feed_title if feed_title else ""
-
-    return "%s%s%s%s" % (feed_title_str, title, author, link)
-
 @utils.export("botset", utils.IntSetting("rss-interval",
-    "Interval (in seconds) between RSS polls", example="120"))
+    "Interval (in seconds) between RSS polls", example="600"))
+@utils.export("channelset", utils.BoolSetting("rss-shorten",
+	    "Whether or not to shorten RSS urls"))
 class Module(ModuleManager.BaseModule):
     _name = "RSS"
     def on_load(self):
         self.timers.add("rss", self.bot.get_setting("rss-interval",
             RSS_INTERVAL))
+
+    def _format_entry(self, server, feed_title, entry, shorten):
+	        title = entry["title"]
+	
+	        author = entry.get("author", None)
+	        author = " by %s" % author if author else ""
+	
+	        link = entry.get("link", None)
+	        if shorten:
+	            link = self.exports.get_one("shorturl")(server, link)
+	        link = " - %s" % link if link else ""
+	
+	        feed_title_str = "%s: " % feed_title if feed_title else ""
+	
+	        return "%s%s%s%s" % (feed_title_str, title, author, link)
+	        
 
     @utils.hook("timer.rss")
     def timer(self, event):
@@ -52,7 +60,6 @@ class Module(ModuleManager.BaseModule):
 
             feed = feedparser.parse(pages[url].data)
             feed_title = feed["feed"].get("title", None)
-            entry_formatted = {}
 
             for server, channel in channels:
                 seen_ids = channel.get_setting("rss-seen-ids-%s" % url, [])
@@ -68,12 +75,10 @@ class Module(ModuleManager.BaseModule):
                         continue
                     valid += 1
 
-                    if not entry_id in entry_formatted:
-                        output = _format_entry(feed_title, entry)
-                        entry_formatted[entry_id] = output
-                    else:
-                        output = entry_formatted[entry_id]
-
+                    shorten = channel.get_setting("rss-shorten", False)
+                    output = self._format_entry(server, feed_title, entry,
+                        shorten)
+	           
                     self.events.on("send.stdout").call(target=channel,
                         module_name="RSS", server=server, message=output)
                     new_ids.append(entry_id)
@@ -101,7 +106,7 @@ class Module(ModuleManager.BaseModule):
     @utils.hook("received.command.rss", min_args=1, channel_only=True)
     def rss(self, event):
         """
-        :help: Modify RSS/Atom configuration for the current channel
+        :help: Modifica configurazione RSS / Atom per il canale corrente
         :usage: list
         :usage: add <url>
         :usage: remove <url>
@@ -117,15 +122,15 @@ class Module(ModuleManager.BaseModule):
             event["stdout"].write("RSS hooks: %s" % ", ".join(rss_hooks))
         elif subcommand == "add":
             if not len(event["args_split"]) > 1:
-                raise utils.EventError("Please provide a URL")
+                raise utils.EventError("Si prega di fornire un URL")
 
             url = utils.http.url_sanitise(event["args_split"][1])
             if url in rss_hooks:
-                raise utils.EventError("That URL is already being watched")
+                raise utils.EventError("Questo URL è già stato monitorato")
 
             seen_ids = self._check_url(url)
             if seen_ids == None:
-                raise utils.EventError("Failed to read feed")
+                raise utils.EventError("Impossibile leggere il feed")
             event["target"].set_setting("rss-seen-ids-%s" % url, seen_ids)
 
             rss_hooks.append(url)
@@ -133,16 +138,16 @@ class Module(ModuleManager.BaseModule):
             message = "Added RSS feed"
         elif subcommand == "remove":
             if not len(event["args_split"]) > 1:
-                raise utils.EventError("Please provide a URL")
+                raise utils.EventError("Si prega di fornire un URL")
 
             url = utils.http.url_sanitise(event["args_split"][1])
             if not url in rss_hooks:
-                raise utils.EventError("I'm not watching that URL")
+                raise utils.EventError("Non sto monitorando questo URL")
             rss_hooks.remove(url)
             changed = True
-            message = "Removed RSS feed"
+            message = "Feed RSS Rimosso"
         else:
-            raise utils.EventError("Unknown subcommand '%s'" % subcommand)
+            raise utils.EventError("Comando sconosciuto'%s'" % subcommand)
 
         if changed:
             if rss_hooks:

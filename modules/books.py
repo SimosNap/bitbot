@@ -12,7 +12,7 @@ class Module(ModuleManager.BaseModule):
 
     def get_book(self, query, event):
         page = utils.http.request(URL_GOOGLEBOOKS, get_params={
-            "q": query, "country": "us"}, json=True)
+            "q": query, "country": "it"}, json=True)
         if page:
             if page.data["totalItems"] > 0:
                 book = page.data["items"][0]["volumeInfo"]
@@ -34,14 +34,14 @@ class Module(ModuleManager.BaseModule):
                 event["stdout"].write("%s%s%s%s%s%s" % (
                     title, authors, date, sub_title, info_link, rating))
             else:
-                event["stderr"].write("Unable to find book")
+                event["stderr"].write("Impossibile trovare il libro")
         else:
             raise utils.EventsResultsError()
 
     @utils.hook("received.command.isbn", min_args=1)
     def isbn(self, event):
         """
-        :help: Get book information from a provided ISBN
+        :help: Ottieni informazioni su un libro fornendo il codice ISBN
         :usage: <isbn>
         """
         isbn = event["args_split"][0]
@@ -50,10 +50,10 @@ class Module(ModuleManager.BaseModule):
         isbn = isbn.replace("-", "")
         self.get_book("isbn:%s" % isbn, event)
 
-    @utils.hook("received.command.book", min_args=1)
+    @utils.hook("received.command.libro", min_args=1)
     def book(self, event):
         """
-        :help: Get book information from a provided title
+        :help: Ottieni informazioni su un libro fornendo il titolo
         :usage: <book title>
         """
         self.get_book(event["args"], event)

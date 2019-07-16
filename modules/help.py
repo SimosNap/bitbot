@@ -37,13 +37,13 @@ class Module(ModuleManager.BaseModule):
 
             out = help
             if usage:
-                out += ". Usage: %s" % usage
+                out += ". Sintassi: %s" % usage
             event["stdout"].write("%s: %s" % (command, out))
         else:
-            event["stdout"].write("I'm %s. use '%smodules' to list modules, "
-                "'%scommands <module>' to list commands and "
-                "'%shelp <command>' to see help text for a command" %
-                (IRCBot.URL, event["command_prefix"], event["command_prefix"],
+            event["stdout"].write("Usa '%smodules' per la lista dei moduli, "
+                "'%scommands <module>' per la lista dei comandi e "
+                "'%shelp <command>' per la sintassi di un comando" %
+                (event["command_prefix"], event["command_prefix"],
                 event["command_prefix"]))
 
     def _all_command_hooks(self):
@@ -64,7 +64,7 @@ class Module(ModuleManager.BaseModule):
                 contexts[module.context] = module.name
 
         modules_available = sorted(contexts.values())
-        event["stdout"].write("Modules: %s" % ", ".join(modules_available))
+        event["stdout"].write("Moduli: %s" % ", ".join(modules_available))
 
     @utils.hook("received.command.commands", min_args=1)
     def commands(self, event):
@@ -78,5 +78,5 @@ class Module(ModuleManager.BaseModule):
             if command_hook.context == module.context:
                 commands.append(command)
 
-        event["stdout"].write("Commands for %s module: %s" % (
+        event["stdout"].write("Commandi per il modulo %s: %s" % (
             module.name, ", ".join(commands)))

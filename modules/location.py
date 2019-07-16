@@ -12,8 +12,8 @@ class LocationSetting(utils.Setting):
 
 class Module(ModuleManager.BaseModule):
     def on_load(self):
-        setting = LocationSetting("location", "Set your location",
-            example="London, GB")
+        setting = LocationSetting("location", "Imposta la tua località",
+            example="Firenze, IT")
         setting._func = self._get_location
         self.exports.add("set", setting)
 
